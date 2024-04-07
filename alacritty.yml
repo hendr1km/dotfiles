@@ -1,0 +1,27 @@
+live_config_reload: true
+
+window:
+  dynamic_title: true
+  opacity: 0.9
+  padding:
+    x: 4 
+    y: 4 
+    # dynamic_padding: true 
+    # decorations: buttonless
+
+font:
+  normal:
+    family: Monaco
+    style: Regular
+  size: 12
+
+colors:
+  # Default colors
+  primary:
+    background: '#232a2e'  
+    foreground: '#d3c6aa'
+
+env:
+  TERM: xterm-256color
+
+
