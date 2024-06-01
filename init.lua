@@ -48,6 +48,28 @@ config = function()
   vim.g.slime_target = "tmux"
 end},
 
+  
+-- slime cells
+{'klafyvel/vim-slime-cells', 
+requires = {{'jpalardy/vim-slime', opt=true}},
+  ft = {'r'},
+  config=function ()
+    vim.g.slime_target = "tmux"
+    vim.g.slime_cell_delimiter = "^\\s*##"
+    vim.g.slime_default_config = {socket_name="default", target_pane="1"}
+    vim.g.slime_dont_ask_default = 1
+    vim.g.slime_bracketed_paste = 1
+    vim.g.slime_no_mappings = 1
+    vim.cmd([[
+    nmap <leader>cv <Plug>SlimeConfig
+    nmap <leader>cc <Plug>SlimeCellsSendAndGoToNext
+    nmap <leader>j <Plug>SlimeCellsNext
+    nmap <leader>k <Plug>SlimeCellsPrev
+    ]])
+  end
+},
+
+  
 -- Latex 
 {"lervag/vimtex",
 init = function()
