@@ -1,5 +1,5 @@
 vim.cmd("set expandtab")
-vim.cmd("set tabstop=3")
+vim.cmd("set tabstop=2")
 vim.cmd("set softtabstop=2")
 vim.cmd("set shiftwidth=2")
 
@@ -19,8 +19,13 @@ vim.opt.showmode = false
 -- save to clipboard
 vim.opt.clipboard="unnamed"
 
+
 -- R pipe
 vim.keymap.set('i','<leader>m' ,'<space>%>%', {silent = true}) -- R Pipe
+
+-- Prevent deleting from also copying
+vim.keymap.set({'n', 'v'}, 'd', '"_d', { noremap = true })
+vim.keymap.set('n', 'dd', '"_dd', { noremap = true })
 
 
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -45,7 +50,6 @@ local plugins = {
 -- hex color viwer
 {'norcalli/nvim-colorizer.lua'},
 
-
 -- auto pairs
 {
     'windwp/nvim-autopairs',
@@ -55,14 +59,12 @@ local plugins = {
     -- this is equalent to setup({}) function
 },
 
-
 -- send to tmux pane
 {"jpalardy/vim-slime", name = "vim-slime",
 config = function()
   vim.g.slime_target = "tmux"
 end},
 
-  
 -- slime cells
 {'klafyvel/vim-slime-cells', 
 requires = {{'jpalardy/vim-slime', opt=true}},
@@ -74,6 +76,9 @@ requires = {{'jpalardy/vim-slime', opt=true}},
     vim.g.slime_dont_ask_default = 1
     vim.g.slime_bracketed_paste = 1
     vim.g.slime_no_mappings = 1
+    -- python
+    vim.g.slime_python_ipython = 1
+    -- general sending 
     vim.cmd([[
     nmap <leader>cv <Plug>SlimeConfig
     nmap <leader>cc <Plug>SlimeCellsSendAndGoToNext
@@ -82,7 +87,6 @@ requires = {{'jpalardy/vim-slime', opt=true}},
     ]])
   end
 },
-
   
 -- Latex 
 {"lervag/vimtex",
@@ -91,15 +95,28 @@ init = function()
 end},
 
 -- telescope 
-{"nvim-telescope/telescope.nvim"},
-{"nvim-treesitter/nvim-treesitter"},
-{"nvim-lua/plenary.nvim"},
+-- {"nvim-telescope/telescope.nvim"},
+-- {"nvim-treesitter/nvim-treesitter"},
+-- {"nvim-lua/plenary.nvim"},
 
 -- statusline
 {'nvim-lualine/lualine.nvim',
 dependencies = {'nvim-tree/nvim-web-devicons'}
 },
 
+
+-- auto completion
+{
+"williamboman/mason.nvim",
+"williamboman/mason-lspconfig.nvim",
+"neovim/nvim-lspconfig",
+},
+
+-- Code formatter
+{
+  'stevearc/conform.nvim',
+  opts = {},
+},
 
 }
 local opts = {}
@@ -231,3 +248,34 @@ require('lualine').setup {
 }
 
 require("colorizer").setup()
+
+-- completion
+require("mason").setup()
+
+require("mason-lspconfig").setup {
+    ensure_installed = {"clangd", "r_language_server", "gopls"},
+}
+
+require("lspconfig").r_language_server.setup{}
+require("lspconfig").clangd.setup{}
+require("lspconfig").gopls.setup{}
+
+vim.diagnostic.config({
+  signs = false
+})
+
+-- formatter
+require("conform").setup({
+    go = { "gofmt", },
+    r = { "styler", },
+})
+
+require("conform").setup({
+  format_on_save = function(bufnr)
+    -- Disable with a global or buffer-local variable
+    if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
+      return
+    end
+    return { timeout_ms = 500, lsp_format = "fallback" }
+  end,
+})
