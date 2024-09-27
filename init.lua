@@ -95,9 +95,9 @@ init = function()
 end},
 
 -- telescope 
--- {"nvim-telescope/telescope.nvim"},
--- {"nvim-treesitter/nvim-treesitter"},
--- {"nvim-lua/plenary.nvim"},
+{"nvim-telescope/telescope.nvim"},
+{"nvim-treesitter/nvim-treesitter"},
+{"nvim-lua/plenary.nvim"},
 
 -- statusline
 {'nvim-lualine/lualine.nvim',
@@ -117,6 +117,67 @@ dependencies = {'nvim-tree/nvim-web-devicons'}
   'stevearc/conform.nvim',
   opts = {},
 },
+
+-- file explorer
+{
+  'nvim-tree/nvim-tree.lua'
+},
+
+
+{
+  "wojciech-kulik/xcodebuild.nvim",
+  dependencies = {
+    "nvim-telescope/telescope.nvim",
+    "MunifTanjim/nui.nvim",
+  },
+  config = function()
+    require("xcodebuild").setup({ 
+      code_coverage = {
+        enabled = true,
+      },
+
+    })
+
+    vim.keymap.set("n", "<leader>xl", "<cmd>XcodebuildToggleLogs<cr>", { desc = "Toggle Xcodebuild Logs" })
+    vim.keymap.set("n", "<leader>xb", "<cmd>XcodebuildBuild<cr>", { desc = "Build Project" })
+    vim.keymap.set("n", "<leader>xr", "<cmd>XcodebuildBuildRun<cr>", { desc = "Build & Run Project" })
+    vim.keymap.set("n", "<leader>xt", "<cmd>XcodebuildTest<cr>", { desc = "Run Tests" })
+    vim.keymap.set("n", "<leader>xT", "<cmd>XcodebuildTestClass<cr>", { desc = "Run This Test Class" })
+    vim.keymap.set("n", "<leader>X", "<cmd>XcodebuildPicker<cr>", { desc = "Show All Xcodebuild Actions" })
+    vim.keymap.set("n", "<leader>xd", "<cmd>XcodebuildSelectDevice<cr>", { desc = "Select Device" })
+    vim.keymap.set("n", "<leader>xp", "<cmd>XcodebuildSelectTestPlan<cr>", { desc = "Select Test Plan" })
+    vim.keymap.set("n", "<leader>xc", "<cmd>XcodebuildToggleCodeCoverage<cr>", { desc = "Toggle Code Coverage" })
+    vim.keymap.set("n", "<leader>xC", "<cmd>XcodebuildShowCodeCoverageReport<cr>", { desc = "Show Code Coverage Report" })
+    vim.keymap.set("n", "<leader>xq", "<cmd>Telescope quickfix<cr>", { desc = "Show QuickFix List" })
+  end,
+},
+
+{
+  "mfussenegger/nvim-lint",
+  event = { "BufReadPre", "BufNewFile" },
+  config = function()
+    local lint = require("lint")
+
+    lint.linters_by_ft = {
+      swift = { "swiftlint" },
+    }
+
+    local lint_augroup = vim.api.nvim_create_augroup("lint", { clear = true })
+
+    vim.api.nvim_create_autocmd({ "BufWritePost", "BufReadPost", "InsertLeave", "TextChanged" }, {
+      group = lint_augroup,
+      callback = function()
+        require("lint").try_lint()
+      end,
+    })
+
+    vim.keymap.set("n", "<leader>ml", function()
+      require("lint").try_lint()
+    end, { desc = "Lint file" })
+  end,
+},
+
+
 
 }
 local opts = {}
@@ -199,11 +260,11 @@ vim.cmd("colorscheme rose-pine")
 
 
 -- telescope minimal config
--- local builtin = require('telescope.builtin')
--- vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
--- vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
--- vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
--- vim.keymap.set('n', '<leader>fh', builtin.help_tags, {})
+local builtin = require('telescope.builtin')
+vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
+vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
+vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
+vim.keymap.set('n', '<leader>fh', builtin.help_tags, {})
 
 -- statusline setup
 require('lualine').setup {
@@ -266,8 +327,10 @@ vim.diagnostic.config({
 
 -- formatter
 require("conform").setup({
+ formatters_by_ft = {
     go = { "gofmt", },
-    r = { "styler", },
+    swift = { "swiftformat", },
+  }
 })
 
 require("conform").setup({
@@ -276,6 +339,9 @@ require("conform").setup({
     if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
       return
     end
-    return { timeout_ms = 500, lsp_format = "fallback" }
+    return { timeout_ms = 2000, lsp_format = "fallback" }
   end,
 })
+
+
+
